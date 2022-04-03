@@ -13,7 +13,7 @@ pipeline{
 		stage('Build') {
 
 			steps {
-				sh 'docker build -t $DOCKER_REPO:latest $DOCKERFILE_DIR'
+				sh 'docker build -t $DOCKER_REPO:$BUILD_ID $DOCKERFILE_DIR'
 			}
 		}
 
@@ -27,6 +27,8 @@ pipeline{
 		stage('Push') {
 
 			steps {
+			    sh 'docker push $DOCKER_REPO:$BUILD_ID'
+				sh 'docker tag $DOCKER_REPO:$BUILD_ID $DOCKER_REPO:latest'
 				sh 'docker push $DOCKER_REPO:latest'
 			}
 		}
