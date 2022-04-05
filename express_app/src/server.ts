@@ -15,7 +15,7 @@ const app = express();
 const parser = json();
 
 app.get("/", (req:any, res:any) => {
-  res.status(200).send("hello world!");
+  res.status(200).send("Hello World from mbazych!");
 });
 
 app.get("/ping", (req:any, res:any) => {
