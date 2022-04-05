@@ -6,6 +6,10 @@ pipeline{
 		DOCKERHUB_CREDENTIALS=credentials('docker-hub')
 		DOCKERFILE_DIR='express_app/'
 		DOCKER_REPO='mbazych/rsq'
+		CONTEXT_NAME='mbazych@foodash-cluster'
+		NAMESPACE='rsq'
+		CHART_NAME='rsq'
+		CHART_DIR='Helm/express_app/express_app/'
 	}
 
 	stages {
@@ -32,6 +36,19 @@ pipeline{
 				sh 'docker push $DOCKER_REPO:latest'
 			}
 		}
+		
+		stage('Deploy') {
+		    
+		    steps {
+		        withCredentials([file(credentialsId: 'kube-config', variable: 'CONFIG')]) {
+		        sh 'mkdir -p ~/.kube'
+		        sh 'cp $CONFIG ~/.kube/config'
+		        sh 'chmod 600 ~/.kube/config'
+		        sh 'kubectl config use-context $CONTEXT_NAME'
+		        sh 'helm upgrade --install --namespace $NAMESPACE $CHART_NAME $CHART_DIR'
+		    }
+		}
+	}
 	}
 
 	post {
