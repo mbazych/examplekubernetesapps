@@ -37,9 +37,15 @@ securityContext: {}
   # runAsUser: 1000
 
 postgres:
-  database: postgres
-  username: postgres
-  host: postgresql.rsq.svc.foodash-cluster
+  database: 
+    key: postgres-db
+    secretName: postgresql
+  username: 
+    key: postgres-username
+    secretName: postgresql
+  host: 
+    key: postgres-host
+    secretName: postgresql
   password:
     key: postgres-password
     secretName: postgresql
