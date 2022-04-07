@@ -7,7 +7,8 @@ pipeline{
 		DOCKERFILE_DIR='express_app/'
 		DOCKER_REPO='mbazych/rsq'
 		CONTEXT_NAME='mbazych@foodash-cluster'
-		NAMESPACE='rsq'
+		PROD_NAMESPACE='rsq'
+		STAGE_NAMESPACE='rsq-stage'
 		CHART_NAME='rsq'
 		CHART_DIR='Helm/express_app/express_app/'
 		TEST_HOST='172.22.0.1:8090'
@@ -49,19 +50,35 @@ pipeline{
 				sh 'docker push $DOCKER_REPO:latest'
 			}
 		}
-		
-		stage('Deploy') {
-		    
+		stage('Deploy to stage environment') {
+			when {
+				branch "stage"
+			}
 		    steps {
 		        withCredentials([file(credentialsId: 'kube-config', variable: 'CONFIG')]) {
-		        sh 'mkdir -p ~/.kube'
-		        sh 'cp $CONFIG ~/.kube/config'
-		        sh 'chmod 600 ~/.kube/config'
-		        sh 'kubectl config use-context $CONTEXT_NAME'
-		        sh 'helm upgrade --install --namespace $NAMESPACE $CHART_NAME $CHART_DIR'
-		    }
+					sh 'mkdir -p ~/.kube'
+					sh 'cp $CONFIG ~/.kube/config'
+					sh 'chmod 600 ~/.kube/config'
+					sh 'kubectl config use-context $CONTEXT_NAME'
+					sh 'helm upgrade --install --namespace $STAGE_NAMESPACE $CHART_NAME $CHART_DIR'
+				}
+			}
 		}
-	}
+
+		stage('Deploy to production environment') {
+		    when {
+				branch "main"
+			}
+		    steps {
+		        withCredentials([file(credentialsId: 'kube-config', variable: 'CONFIG')]) {
+					sh 'mkdir -p ~/.kube'
+					sh 'cp $CONFIG ~/.kube/config'
+					sh 'chmod 600 ~/.kube/config'
+					sh 'kubectl config use-context $CONTEXT_NAME'
+					sh 'helm upgrade --install --namespace $PROD_NAMESPACE $CHART_NAME $CHART_DIR'
+				}
+			}
+		}
 	}
 
 	post {
