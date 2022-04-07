@@ -60,7 +60,7 @@ pipeline{
 					sh 'cp $CONFIG ~/.kube/config'
 					sh 'chmod 600 ~/.kube/config'
 					sh 'kubectl config use-context $CONTEXT_NAME'
-					sh 'helm upgrade --install --namespace $STAGE_NAMESPACE $CHART_NAME $CHART_DIR'
+					sh 'helm upgrade --install --namespace $STAGE_NAMESPACE $CHART_NAME $CHART_DIR --set "ingress.hosts[0].host=stage-express-app-rsq.mbazych.pl"'
 				}
 			}
 		}
