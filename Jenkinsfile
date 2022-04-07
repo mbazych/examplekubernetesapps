@@ -16,7 +16,7 @@ pipeline{
 
 	stages {
 
-		stage('Test') {
+		stage('Test application') {
 			steps {
 				dir('express_app/') {
 					sh 'docker-compose up --build -d'
@@ -28,21 +28,21 @@ pipeline{
 			}
 		}
 
-		stage('Build') {
+		stage('Build docker image') {
 
 			steps {
 				sh 'docker build -t $DOCKER_REPO:$BUILD_ID $DOCKERFILE_DIR'
 			}
 		}
 
-		stage('Login') {
+		stage('Docker login') {
 
 			steps {
 				sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
 			}
 		}
 
-		stage('Push') {
+		stage('Push to docker hub') {
 
 			steps {
 			    sh 'docker push $DOCKER_REPO:$BUILD_ID'
