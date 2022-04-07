@@ -51,9 +51,9 @@ pipeline{
 			}
 		}
 		stage('Deploy to stage environment') {
-			when {
-				branch "stage"
-			}
+            when {
+                expression { env.BRANCH_NAME == 'stage' }
+            }
 		    steps {
 		        withCredentials([file(credentialsId: 'kube-config', variable: 'CONFIG')]) {
 					sh 'mkdir -p ~/.kube'
@@ -66,9 +66,9 @@ pipeline{
 		}
 
 		stage('Deploy to production environment') {
-		    when {
-				branch "main"
-			}
+            when {
+                expression { env.BRANCH_NAME == 'main' }
+            }
 		    steps {
 		        withCredentials([file(credentialsId: 'kube-config', variable: 'CONFIG')]) {
 					sh 'mkdir -p ~/.kube'
