@@ -1,7 +1,9 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 chai.use(require('chai-fuzzy'))
-let server = "localhost:8090"
+let server = "localhost:8080"
+let should = chai.should();
+let expect = chai.expect;
 chai.use(chaiHttp);
 
 
