@@ -10,9 +10,22 @@ pipeline{
 		NAMESPACE='rsq'
 		CHART_NAME='rsq'
 		CHART_DIR='Helm/express_app/express_app/'
+		TEST_HOST='172.22.0.1:8090'
 	}
 
 	stages {
+
+		stage('Test') {
+			steps {
+				dir('express_app/') {
+					sh 'docker-compose up --build -d'
+				
+					sh 'sleep 10'
+					sh 'npm install'
+					sh 'mocha src/tests/postgres-item.js'
+				}
+			}
+		}
 
 		stage('Build') {
 
@@ -54,6 +67,9 @@ pipeline{
 	post {
 		always {
 			sh 'docker logout'
+			dir('express_app/') {
+				sh 'docker-compose down --rmi all'
+			}
 		}
 	}
 
