@@ -31,7 +31,7 @@ pipeline{
 		stage('Build docker image') {
 
 			steps {
-				sh 'docker build -t $DOCKER_REPO:$BUILD_ID $DOCKERFILE_DIR'
+				sh 'docker build -t $DOCKER_REPO:$GIT_COMMIT $DOCKERFILE_DIR'
 			}
 		}
 
@@ -45,8 +45,8 @@ pipeline{
 		stage('Push to docker hub') {
 
 			steps {
-			    sh 'docker push $DOCKER_REPO:$BUILD_ID'
-				sh 'docker tag $DOCKER_REPO:$BUILD_ID $DOCKER_REPO:latest'
+			    sh 'docker push $DOCKER_REPO:$GIT_COMMIT'
+				sh 'docker tag $DOCKER_REPO:$GIT_COMMIT $DOCKER_REPO:latest'
 				sh 'docker push $DOCKER_REPO:latest'
 			}
 		}
