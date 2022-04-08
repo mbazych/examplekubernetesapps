@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "express_app.fullname" . }}
+  labels:
+    {{- include "express_app.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "express_app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        date: "{{ now | unixEpoch }}" # this is to keep using "latest" in helm chart
+        {{- include "express_app.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "express_app.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef: 
+                  key: {{ .Values.postgres.password.key }}
+                  name: {{ .Values.postgres.password.secretName }}
+            - name: PG_USERNAME
+              valueFrom:
+                secretKeyRef: 
+                  key: {{ .Values.postgres.username.key }}
+                  name: {{ .Values.postgres.username.secretName }}
+            - name: PG_HOST
+              valueFrom:
+                secretKeyRef: 
+                  key: {{ .Values.postgres.host.key }}
+                  name: {{ .Values.postgres.host.secretName }}
+            - name: PG_DATABASE
+              valueFrom:
+                secretKeyRef: 
+                  key: {{ .Values.postgres.database.key }}
+                  name: {{ .Values.postgres.database.secretName }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
